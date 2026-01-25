@@ -1,0 +1,1 @@
+export { TagLineSearchBar } from './TagLineSearchBar';
