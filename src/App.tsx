@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
-import { SummonerNameSearchBar } from './components/SummonerNameSearchBar'
-import { TagLineSearchBar } from './components/TagLineSearchBar'
+import { LeftNav } from './components/LeftNav'
+import { CombinedSearchBar } from './components/CombinedSearchBar'
 import { MatchCard } from './components/MatchCard'
+import { ChampionsPage } from './components/ChampionsPage'
+import { championService, type ChampionData } from './services/championService'
 
 interface MetaDataDto {
   dataVersion: string
@@ -77,18 +79,28 @@ interface SummonerData {
 }
 
 function App() {
-  const [gameName, setGameName] = useState('')
-  const [tagLine, setTagLine] = useState('')
+  const [currentPage, setCurrentPage] = useState<'home' | 'champions'>('home')
   const [summonerData, setSummonerData] = useState<SummonerData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [navOpen, setNavOpen] = useState(false)
+  const [backdropChampion, setBackdropChampion] = useState<{
+    champion: ChampionData
+    skinNum: number
+  } | null>(null)
 
-  const handleSearch = async () => {
-    if (!gameName.trim() || !tagLine.trim()) {
-      setError('Please enter both summoner name and tag line')
-      return
+  useEffect(() => {
+    const loadChampionBackdrop = async () => {
+      const champion = await championService.getRandomChampionWithSkins()
+      // Use skin 0 (default) if skins array doesn't exist
+      const skinNum = champion.skins ? champion.skins[Math.floor(Math.random() * champion.skins.length)].num : 0
+      setBackdropChampion({ champion, skinNum })
     }
 
+    loadChampionBackdrop()
+  }, [])
+
+  const handleSearch = async (gameName: string, tagLine: string) => {
     setLoading(true)
     setError('')
 
@@ -112,76 +124,100 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>Summoner Search</h1>
-        <p className="app-subtitle">Find summoner information and match history</p>
-      </header>
+    <>
+      <LeftNav isOpen={navOpen} onClose={() => setNavOpen(false)} onNavigate={(page) => {
+        setCurrentPage(page)
+        setNavOpen(false)
+      }} />
+      <div className="app-container">
+        {backdropChampion && currentPage === 'home' && (
+          <div
+            className="backdrop"
+            style={{
+              backgroundImage: `url('${championService.getSkinSplashUrl(
+                backdropChampion.champion.id,
+                backdropChampion.skinNum
+              )}')`,
+            }}
+          />
+        )}
 
-      <div className="search-section">
-        <div className="search-inputs">
-          <SummonerNameSearchBar
-            onSearch={setGameName}
-            placeholder="Enter summoner name..."
-          />
-          <TagLineSearchBar
-            onSearch={setTagLine}
-            placeholder="Enter tag line..."
-          />
-        </div>
         <button
-          className="search-submit-btn"
-          onClick={handleSearch}
-          disabled={loading}
+          className="hamburger-btn"
+          onClick={() => setNavOpen(!navOpen)}
+          aria-label="Toggle navigation"
         >
-          {loading ? 'Searching...' : 'Search Summoner'}
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
+
+        {currentPage === 'home' && (
+          <>
+            {!summonerData && (
+              <>
+                <header className="app-header">
+                  <h1>Javi GG</h1>
+                  <p className="app-subtitle">Search yourself or your friends!</p>
+                </header>
+
+                <div className="search-section">
+                  <div className="search-inputs">
+                    <CombinedSearchBar onSearch={handleSearch} isLoading={loading} />
+                  </div>
+                </div>
+
+                {error && <div className="error-message">{error}</div>}
+              </>
+            )}
+
+            {summonerData && (
+              <div className="results-section">
+                <div className="summoner-header">
+                  <img
+                    src={`https://ddragon.leagueoflegends.com/cdn/14.2.1/img/profileicon/${summonerData.summoner.profileIconId}.png`}
+                    alt={`${summonerData.gameName} profile icon`}
+                    className="summoner-icon"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        'https://ddragon.leagueoflegends.com/cdn/14.2.1/img/profileicon/0.png'
+                    }}
+                  />
+                  <div className="summoner-info">
+                    <h2>
+                      {summonerData.gameName}
+                      <span className="tagline">#{summonerData.tagLine}</span>
+                    </h2>
+                    <p className="level">Level {summonerData.summoner.summonerLevel}</p>
+                  </div>
+                </div>
+
+                <div className="matches-section">
+                  <h3 className="matches-title">
+                    Match History ({summonerData.matchHistory.length})
+                  </h3>
+                  <div className="matches-grid">
+                    {summonerData.matchDetails.map((match) => (
+                      <MatchCard
+                        key={match.metadata.matchId}
+                        match={match}
+                        gameName={summonerData.gameName}
+                        tagLine={summonerData.tagLine}
+                        profileIconId={summonerData.summoner.profileIconId}
+                        summonerLevel={summonerData.summoner.summonerLevel}
+                        puuid={summonerData.summoner.puuid}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {currentPage === 'champions' && <ChampionsPage />}
       </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      {summonerData && (
-        <div className="results-section">
-          <div className="summoner-header">
-            <img
-              src={`https://ddragon.leagueoflegends.com/cdn/14.2.1/img/profileicon/${summonerData.summoner.profileIconId}.png`}
-              alt={`${summonerData.gameName} profile icon`}
-              className="summoner-icon"
-              onError={(e) => {
-                e.currentTarget.src =
-                  'https://ddragon.leagueoflegends.com/cdn/14.2.1/img/profileicon/0.png'
-              }}
-            />
-            <div className="summoner-info">
-              <h2>
-                {summonerData.gameName}
-                <span className="tagline">#{summonerData.tagLine}</span>
-              </h2>
-              <p className="level">Level {summonerData.summoner.summonerLevel}</p>
-            </div>
-          </div>
-
-          <div className="matches-section">
-            <h3 className="matches-title">
-              Match History ({summonerData.matchHistory.length})
-            </h3>
-            <div className="matches-grid">
-              {summonerData.matchDetails.map((match) => (
-                <MatchCard
-                  key={match.metadata.matchId}
-                  match={match}
-                  gameName={summonerData.gameName}
-                  tagLine={summonerData.tagLine}
-                  profileIconId={summonerData.summoner.profileIconId}
-                  summonerLevel={summonerData.summoner.summonerLevel}
-                  puuid={summonerData.summoner.puuid}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   )
 }
 

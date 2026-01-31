@@ -1,0 +1,1 @@
+export { CombinedSearchBar } from './CombinedSearchBar';

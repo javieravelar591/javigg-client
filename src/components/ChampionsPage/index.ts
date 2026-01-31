@@ -1,0 +1,1 @@
+export { ChampionsPage } from './ChampionsPage'

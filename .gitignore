@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# champion files
+/resources
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

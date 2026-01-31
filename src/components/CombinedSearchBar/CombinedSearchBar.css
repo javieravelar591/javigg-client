@@ -1,0 +1,107 @@
+.combined-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.combined-search-bar:focus-within {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1), 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-family: inherit;
+  color: #333;
+  padding: 14px 16px;
+  transition: all 0.3s ease;
+}
+
+.game-name-input {
+  flex: 3;
+  min-width: 0;
+}
+
+.game-name-input::placeholder {
+  color: #999;
+}
+
+.game-name-input:focus {
+  outline: none;
+  background-color: rgba(0, 102, 204, 0.02);
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e0e0e0;
+}
+
+.tagline-input {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.tagline-input::placeholder {
+  color: #999;
+  text-transform: none;
+}
+
+.tagline-input:focus {
+  outline: none;
+  background-color: rgba(240, 173, 78, 0.02);
+}
+
+.search-button {
+  padding: 14px 28px;
+  border: none;
+  background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.search-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%);
+}
+
+.search-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .combined-search-bar {
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .search-button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
