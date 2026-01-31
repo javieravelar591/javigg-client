@@ -4,6 +4,66 @@ import { SummonerNameSearchBar } from './components/SummonerNameSearchBar'
 import { TagLineSearchBar } from './components/TagLineSearchBar'
 import { MatchCard } from './components/MatchCard'
 
+interface MetaDataDto {
+  dataVersion: string
+  matchId: string
+  participants: string[]
+}
+
+interface InfoDto {
+  endOfGameResult: string
+  gameDuration: number
+  gameMode: string
+  participants: ParticipantDto[]
+}
+
+interface ParticipantDto {
+  assists: number
+  champLevel: number
+  championId: number
+  championName: string
+  damageDealtToBuildings: number
+  deaths: number
+  dragonKills: number
+  goldEarned: number
+  goldSpent: number
+  item0: number
+  item1: number
+  item2: number
+  item3: number
+  item4: number
+  item5: number
+  item6: number
+  kills: number
+  lane: string
+  magicDamageDealt: number
+  magicDamageDealtToChampions: number
+  physicalDamageDealt: number
+  physicalDamageDealtToChampions: number
+  profileIcon: number
+  puuid: string
+  riotIdGameName: string
+  riotIdTagline: string
+  role: string
+  teamId: number
+  teamPosition: string
+  totalDamageDealt: number
+  totalDamageDealtToChampions: number
+  totalDamageTaken: number
+  trueDamageDealt: number
+  trueDamageDealtToChampions: number
+  wardsPlaced: number
+  win: boolean
+  individualPosition: string
+  summonerLevel: number
+}
+
+interface MatchDto {
+  metadata: MetaDataDto
+  info: InfoDto
+  participants: ParticipantDto[]
+}
+
 interface SummonerData {
   summoner: {
     puuid: string
@@ -13,6 +73,7 @@ interface SummonerData {
   gameName: string
   tagLine: string
   matchHistory: string[]
+  matchDetails: MatchDto[]
 }
 
 function App() {
@@ -105,14 +166,15 @@ function App() {
               Match History ({summonerData.matchHistory.length})
             </h3>
             <div className="matches-grid">
-              {summonerData.matchHistory.map((matchId) => (
+              {summonerData.matchDetails.map((match) => (
                 <MatchCard
-                  key={matchId}
-                  matchId={matchId}
+                  key={match.metadata.matchId}
+                  match={match}
                   gameName={summonerData.gameName}
                   tagLine={summonerData.tagLine}
                   profileIconId={summonerData.summoner.profileIconId}
                   summonerLevel={summonerData.summoner.summonerLevel}
+                  puuid={summonerData.summoner.puuid}
                 />
               ))}
             </div>
