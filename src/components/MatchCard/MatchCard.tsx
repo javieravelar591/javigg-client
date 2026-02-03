@@ -85,14 +85,14 @@ const formatNumber = (num: number): string => {
   return num.toString();
 };
 
-export const MatchCard: React.FC<MatchCardProps> = ({
+export const MatchCard = ({
   match,
   gameName,
   tagLine,
   profileIconId,
   summonerLevel,
   puuid,
-}) => {
+}: MatchCardProps) => {
   // Find the current player
   const currentPlayer = match.info.participants.find((p) => p.puuid === puuid);
   const isVictory = currentPlayer?.win ?? false;
@@ -105,22 +105,6 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   return (
     <div className={`match-card ${isVictory ? 'victory' : 'defeat'}`}>
       <div className="match-card-header">
-        <img
-          src={championUrl}
-          alt={`${gameName} profile icon`}
-          className="match-card-icon"
-          onError={(e) => {
-            e.currentTarget.src =
-              'https://ddragon.leagueoflegends.com/cdn/14.2.1/img/profileicon/0.png';
-          }}
-        />
-        <div className="match-card-player-info">
-          <h3 className="match-card-player-name">
-            {gameName}
-            <span className="match-card-tagline">#{tagLine}</span>
-          </h3>
-          <p className="match-card-level">Level {summonerLevel}</p>
-        </div>
         <div className={`match-result ${isVictory ? 'victory' : 'defeat'}`}>
           {isVictory ? 'VICTORY' : 'DEFEAT'}
         </div>
