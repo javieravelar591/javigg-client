@@ -1,60 +1,57 @@
 .champions-page {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 32px;
   color: white;
-  z-index: 1;
-  position: relative;
-  width: 84vw;
+  width: 100%;
+  max-width: 1100px;
 }
 
-.champions-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
+/* ── Header ──────────────────────────────────────────── */
+.champions-header { text-align: center; }
 
 .champions-header h1 {
-  margin: 0;
-  font-size: 48px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #0066cc 0%, #00d4ff 100%);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #C89B3C 0%, #f0d080 50%, #C89B3C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .champions-subtitle {
   margin: 0;
-  font-size: 16px;
-  color: #b0b0b0;
-  letter-spacing: 0.5px;
+  font-size: 13px;
+  color: #555;
+  letter-spacing: 1px;
 }
 
+/* ── Grid ────────────────────────────────────────────── */
 .champions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 16px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
 }
 
 .champion-card {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(0, 102, 204, 0.2);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  height: 100%;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .champion-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(0, 212, 255, 0.5);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+  transform: translateY(-5px);
+  border-color: rgba(200, 155, 60, 0.4);
+  box-shadow: 0 8px 24px rgba(200, 155, 60, 0.1);
 }
 
 .champion-image-wrapper {
@@ -62,97 +59,59 @@
   width: 100%;
   padding-bottom: 100%;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: #0d0d1f;
 }
 
 .champion-image {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 50%;
   transition: transform 0.3s ease;
 }
 
-.champion-card:hover .champion-image {
-  transform: scale(1.1);
-}
+.champion-card:hover .champion-image { transform: scale(1.08); }
 
 .champion-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0);
-  transition: background 0.3s ease;
-}
-
-.champion-card:hover .champion-overlay {
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.view-details-btn {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #0066cc 0%, #00d4ff 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
   opacity: 0;
-  transform: translateY(20px);
+  transition: opacity 0.2s ease;
 }
 
-.champion-card:hover .view-details-btn {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.view-details-btn:hover {
-  box-shadow: 0 4px 16px rgba(0, 212, 255, 0.4);
-  transform: translateY(-2px);
-}
+.champion-card:hover .champion-overlay { opacity: 1; }
 
 .champion-info {
-  padding: 12px 8px;
+  padding: 8px 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
+  gap: 2px;
 }
 
 .champion-info h3 {
-  margin: 0;
-  font-size: 14px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
   font-weight: 700;
-  color: #00d4ff;
+  color: #e0e0e0;
   line-height: 1.2;
 }
 
 .champion-title {
   margin: 0;
-  font-size: 10px;
-  color: #b0b0b0;
+  font-size: 9px;
+  color: #555;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  line-height: 1.1;
 }
 
+/* ── Modal ───────────────────────────────────────────── */
 .champion-detail-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,64 +120,165 @@
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #0a0a15 0%, #141428 100%);
-  border: 1px solid rgba(0, 102, 204, 0.3);
+  background: linear-gradient(160deg, #0d0d1f 0%, #141428 100%);
+  border: 1px solid rgba(200, 155, 60, 0.2);
   border-radius: 16px;
-  padding: 40px;
-  max-width: 600px;
+  max-width: 640px;
   width: 100%;
   position: relative;
-  animation: slideUp 0.3s ease;
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .modal-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: transparent;
-  border: none;
-  color: #00d4ff;
-  font-size: 32px;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  font-size: 22px;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.modal-close:hover {
-  transform: rotate(90deg);
+.modal-close:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+/* Hero section */
+.modal-hero {
+  display: flex;
+  gap: 0;
 }
 
-.modal-content h2 {
-  margin: 0 0 10px 0;
-  font-size: 36px;
-  background: linear-gradient(135deg, #0066cc 0%, #00d4ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.modal-splash {
+  width: 200px;
+  height: 280px;
+  object-fit: cover;
+  object-position: center top;
+  flex-shrink: 0;
+}
+
+.modal-identity {
+  flex: 1;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.modal-identity h2 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
 }
 
 .modal-title {
-  margin: 0 0 20px 0;
-  font-size: 14px;
-  color: #b0b0b0;
+  margin: 0;
+  font-size: 12px;
+  color: #C89B3C;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  font-family: 'Rajdhani', sans-serif;
 }
 
-.modal-message {
+.modal-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.modal-tag {
+  padding: 3px 10px;
+  background: rgba(200, 155, 60, 0.1);
+  border: 1px solid rgba(200, 155, 60, 0.25);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #C89B3C;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.modal-blurb {
   margin: 0;
-  font-size: 16px;
-  color: #b0b0b0;
+  font-size: 13px;
+  color: #777;
+  line-height: 1.6;
+}
+
+/* Stats */
+.modal-stats {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-stats-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.stat-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-bar-label {
+  font-size: 12px;
+  color: #888;
+  width: 68px;
+  flex-shrink: 0;
+}
+
+.stat-bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #C89B3C, #f0d080);
+  transition: width 0.5s ease;
+}
+
+.stat-bar-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #C89B3C;
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .loading {
@@ -226,58 +286,21 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  font-size: 18px;
-  color: #b0b0b0;
+  font-size: 16px;
+  color: #555;
 }
 
-/* Responsive adjustments */
+/* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 768px) {
-  .champions-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 12px;
-  }
-
-  .champions-header h1 {
-    font-size: 36px;
-  }
-
-  .view-details-btn {
-    padding: 8px 16px;
-    font-size: 12px;
-  }
+  .champions-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+  .modal-splash { width: 140px; height: 200px; }
+  .modal-identity { padding: 20px 16px; }
+  .modal-identity h2 { font-size: 24px; }
 }
 
 @media (max-width: 600px) {
-  .champions-page {
-    gap: 24px;
-  }
-
-  .champions-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 10px;
-  }
-
-  .champions-header h1 {
-    font-size: 28px;
-  }
-
-  .champions-subtitle {
-    font-size: 14px;
-  }
-
-  .champion-info h3 {
-    font-size: 12px;
-  }
-
-  .champion-title {
-    font-size: 9px;
-  }
-
-  .modal-content {
-    padding: 24px;
-  }
-
-  .modal-content h2 {
-    font-size: 24px;
-  }
+  .champions-grid { grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; }
+  .champions-header h1 { font-size: 32px; }
+  .modal-hero { flex-direction: column; }
+  .modal-splash { width: 100%; height: 180px; object-position: center 20%; }
 }

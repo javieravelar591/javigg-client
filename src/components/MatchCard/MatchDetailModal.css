@@ -1,0 +1,364 @@
+/* ── Overlay ─────────────────────────────────────────── */
+.sc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sc-modal {
+  background: linear-gradient(160deg, #0d0d1f 0%, #111125 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 1060px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: scSlideIn 0.22s ease;
+}
+
+@keyframes scSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Modal header ────────────────────────────────────── */
+.sc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.sc-header-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.sc-mode {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.sc-sep-dot { color: #444; }
+.sc-duration { font-size: 14px; color: #666; }
+
+.sc-close {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #666;
+  font-size: 20px;
+  line-height: 1;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sc-close:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+/* ── Scrollable body ─────────────────────────────────── */
+.sc-body {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Team sections ───────────────────────────────────── */
+.sc-team { padding: 0; }
+
+.sc-team-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.sc-team-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.sc-team-blue .sc-team-label { color: #5b9cf6; }
+.sc-team-red  .sc-team-label { color: #f65b5b; }
+
+.sc-team-result {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.sc-team-result.win  { color: #0aca00; background: rgba(10,202,0,0.1); border: 1px solid rgba(10,202,0,0.25); }
+.sc-team-result.loss { color: #ff4444; background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.25); }
+
+/* ── Column headers ──────────────────────────────────── */
+.sc-col-headers {
+  display: grid;
+  grid-template-columns: 220px 110px 60px 70px 1fr 70px 220px;
+  padding: 6px 16px;
+  background: rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 8px;
+  align-items: center;
+}
+
+.sc-col-headers span {
+  font-size: 10px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+}
+
+.sc-col-kda, .sc-col-cs, .sc-col-gold, .sc-col-dmg, .sc-col-wards {
+  text-align: center;
+}
+
+/* ── Player rows ─────────────────────────────────────── */
+.sc-row {
+  display: grid;
+  grid-template-columns: 220px 110px 60px 70px 1fr 70px 220px;
+  padding: 8px 16px;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.15s ease;
+}
+
+.sc-row:last-child { border-bottom: none; }
+.sc-row:hover { background: rgba(255,255,255,0.02); }
+
+.sc-row-me {
+  background: rgba(200, 155, 60, 0.06) !important;
+  border-left: 3px solid rgba(200, 155, 60, 0.4);
+  padding-left: 13px;
+}
+
+/* Champion cell */
+.sc-col-champ {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sc-champ-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sc-champ-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+}
+
+.sc-champ-level {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #0a0a15;
+  border: 1px solid #555;
+  color: #aaa;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 0 3px;
+  border-radius: 2px;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.sc-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sc-player-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d0d0d0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-row-me .sc-player-name { color: #fff; }
+
+.sc-champ-name {
+  font-size: 10px;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* KDA cell */
+.sc-col-kda {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.sc-kda-nums {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  line-height: 1;
+}
+
+.sc-k { color: #0aca00; }
+.sc-d { color: #ff4444; }
+.sc-a { color: #888; }
+.sc-sep { color: #444; font-weight: 400; margin: 0 1px; }
+
+.sc-kda-ratio {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* Generic stat cell */
+.sc-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.sc-stat-val {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #d0d0d0;
+  line-height: 1;
+}
+
+.sc-gold { color: #C89B3C; }
+
+.sc-stat-sub {
+  font-size: 9px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Damage cell */
+.sc-col-dmg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.sc-dmg-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sc-dmg-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.sc-dmg-blue { background: linear-gradient(90deg, #3a6fd8, #5b9cf6); }
+.sc-dmg-red  { background: linear-gradient(90deg, #d83a3a, #f65b5b); }
+
+.sc-dmg-val {
+  font-size: 11px;
+  color: #777;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+}
+
+/* Items cell */
+.sc-col-items {
+  display: flex;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+
+.sc-item-slot {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.sc-item-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sc-modal { max-width: 100%; border-radius: 10px; }
+
+  /* Hide wards and vision on tablet, make dmg col narrower */
+  .sc-col-headers,
+  .sc-row {
+    grid-template-columns: 180px 100px 55px 65px 1fr 190px;
+  }
+
+  .sc-col-wards { display: none; }
+}
+
+@media (max-width: 640px) {
+  .sc-overlay { padding: 0; }
+  .sc-modal { max-height: 100vh; border-radius: 0; }
+
+  .sc-col-headers,
+  .sc-row {
+    grid-template-columns: 160px 90px 1fr 170px;
+  }
+
+  /* Only show: champion, KDA, damage, items on mobile */
+  .sc-col-cs, .sc-col-gold, .sc-col-wards { display: none; }
+
+  .sc-item-slot { width: 22px; height: 22px; }
+  .sc-col-items { gap: 2px; }
+
+  .sc-champ-img { width: 34px; height: 34px; }
+}

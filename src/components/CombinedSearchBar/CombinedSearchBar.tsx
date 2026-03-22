@@ -37,12 +37,12 @@ export const CombinedSearchBar: React.FC<CombinedSearchBarProps> = ({
         placeholder="Enter summoner name..."
         className="search-input game-name-input"
       />
-      <div className="divider"></div>
+      <span className="hash-separator">#</span>
       <input
         type="text"
         value={tagLine}
         onChange={handleTagLineChange}
-        placeholder="Tag"
+        placeholder="TAG"
         className="search-input tagline-input"
         maxLength={10}
       />
