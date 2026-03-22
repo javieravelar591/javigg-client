@@ -36,6 +36,8 @@ interface InfoDto {
   endOfGameResult: string
   gameDuration: number
   gameMode: string
+  queueId: number
+  gameEndTimestamp: number
   participants: ParticipantDto[]
 }
 
@@ -86,6 +88,14 @@ interface ParticipantDto {
   individualPosition: string
   summonerLevel: number
   summonerName?: string
+  summoner1Id: number
+  summoner2Id: number
+  perks?: {
+    styles: {
+      description: string
+      selections: { perk: number }[]
+    }[]
+  }
 }
 
 interface MatchDto {
@@ -98,6 +108,14 @@ interface Account {
   gameName: string
   tagLine: string
 }
+interface RankedEntry {
+  tier: string
+  rank: string
+  leaguePoints: number
+  wins: number
+  losses: number
+}
+
 interface SummonerData {
   summoner: {
     puuid: string
@@ -107,6 +125,7 @@ interface SummonerData {
   account: Account
   matchHistory: string[]
   matchDetails: MatchDto[]
+  rankedSolo: RankedEntry | null
 }
 
 function App() {
@@ -269,6 +288,19 @@ function App() {
                       {summonerData.account.gameName}
                       <span className="tagline">#{summonerData.account.tagLine}</span>
                     </h2>
+                    {summonerData.rankedSolo ? (
+                      <div className="ranked-badge">
+                        <span className={`ranked-tier ranked-tier-${summonerData.rankedSolo.tier.toLowerCase()}`}>
+                          {summonerData.rankedSolo.tier} {summonerData.rankedSolo.rank}
+                        </span>
+                        <span className="ranked-lp">{summonerData.rankedSolo.leaguePoints} LP</span>
+                        <span className="ranked-record">
+                          {summonerData.rankedSolo.wins}W {summonerData.rankedSolo.losses}L
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="ranked-badge"><span className="ranked-tier ranked-tier-unranked">Unranked</span></div>
+                    )}
                     {matchStats && (
                       <div className="summoner-stats-row">
                         <span className="stat-wins">{matchStats.wins}W</span>

@@ -92,7 +92,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 6px 12px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
@@ -123,11 +123,11 @@
 /* ── Column headers ──────────────────────────────────── */
 .sc-col-headers {
   display: grid;
-  grid-template-columns: 220px 110px 60px 70px 1fr 70px 220px;
-  padding: 6px 16px;
+  grid-template-columns: 160px 90px 50px 60px 1fr 55px 152px;
+  padding: 3px 12px;
   background: rgba(0,0,0,0.25);
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
@@ -147,9 +147,9 @@
 /* ── Player rows ─────────────────────────────────────── */
 .sc-row {
   display: grid;
-  grid-template-columns: 220px 110px 60px 70px 1fr 70px 220px;
-  padding: 8px 16px;
-  gap: 8px;
+  grid-template-columns: 160px 90px 50px 60px 1fr 55px 152px;
+  padding: 4px 12px;
+  gap: 6px;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.03);
   transition: background 0.15s ease;
@@ -178,9 +178,9 @@
 }
 
 .sc-champ-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   object-fit: cover;
   display: block;
 }
@@ -207,7 +207,7 @@
 }
 
 .sc-player-name {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   color: #d0d0d0;
   overflow: hidden;
@@ -234,7 +234,7 @@
 }
 
 .sc-kda-nums {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   font-family: 'Rajdhani', sans-serif;
   line-height: 1;
@@ -261,7 +261,7 @@
 
 .sc-stat-val {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #d0d0d0;
   line-height: 1;
@@ -286,9 +286,9 @@
 
 .sc-dmg-bar-track {
   width: 100%;
-  height: 6px;
+  height: 4px;
   background: rgba(255,255,255,0.06);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
@@ -316,9 +316,9 @@
 }
 
 .sc-item-slot {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
   overflow: hidden;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
@@ -361,4 +361,27 @@
   .sc-col-items { gap: 2px; }
 
   .sc-champ-img { width: 34px; height: 34px; }
+}
+
+/* ── Spells & Rune in modal ──────────────────────────── */
+.sc-spells-rune {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.sc-spell-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.sc-rune-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(0,0,0,0.5);
 }

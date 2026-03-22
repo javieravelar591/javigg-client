@@ -455,3 +455,42 @@
   .summoner-icon { width: 80px; height: 80px; }
   .summoner-info h2 { font-size: 24px; }
 }
+
+/* ── Ranked Badge ────────────────────────────────────── */
+.ranked-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.ranked-tier {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+}
+.ranked-tier-iron        { color: #8B8B8B; }
+.ranked-tier-bronze      { color: #CD7F32; }
+.ranked-tier-silver      { color: #C0C0C0; }
+.ranked-tier-gold        { color: #C89B3C; }
+.ranked-tier-platinum    { color: #4FC3A1; }
+.ranked-tier-emerald     { color: #00C853; }
+.ranked-tier-diamond     { color: #57C5F7; }
+.ranked-tier-master      { color: #9B59B6; }
+.ranked-tier-grandmaster { color: #CF0000; }
+.ranked-tier-challenger  { color: #F4C14F; }
+.ranked-tier-unranked    { color: #666; }
+.ranked-lp {
+  font-size: 12px;
+  color: #C89B3C;
+  font-weight: 600;
+}
+.ranked-record {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+}

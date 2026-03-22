@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import './MatchDetailModal.css';
 
 import { DDRAGON } from '../../constants';
+import { spellService } from '../../services/spellService';
+import { runeService } from '../../services/runeService';
 
 interface ParticipantDto {
   assists: number;
@@ -23,6 +25,14 @@ interface ParticipantDto {
   wardsPlaced: number;
   win: boolean;
   summonerName?: string;
+  summoner1Id: number;
+  summoner2Id: number;
+  perks?: {
+    styles: {
+      description: string;
+      selections: { perk: number }[];
+    }[];
+  };
 }
 
 interface MatchDetailModalProps {
@@ -73,12 +83,14 @@ const TeamTable = ({
   side,
   maxDmg,
   puuid,
+  gameDuration,
 }: {
   players: ParticipantDto[];
   label: string;
   side: 'blue' | 'red';
   maxDmg: number;
   puuid: string;
+  gameDuration: number;
 }) => (
   <div className={`sc-team sc-team-${side}`}>
     <div className="sc-team-header">
@@ -100,9 +112,11 @@ const TeamTable = ({
 
     {players.map((p) => {
       const cs = (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0);
+      const csPerMin = gameDuration > 0 ? (cs / (gameDuration / 60)).toFixed(1) : '0.0';
       const ratio = kdaRatio(p.kills, p.deaths, p.assists);
       const isMe = p.puuid === puuid;
       const name = p.riotIdGameName || p.summonerName || '—';
+      const keystoneId = p.perks?.styles?.[0]?.selections?.[0]?.perk ?? null;
 
       return (
         <div key={p.puuid} className={`sc-row ${isMe ? 'sc-row-me' : ''}`}>
@@ -116,6 +130,16 @@ const TeamTable = ({
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
               <span className="sc-champ-level">{p.champLevel}</span>
+            </div>
+            <div className="sc-spells-rune">
+              {[p.summoner1Id, p.summoner2Id].map((id, i) => {
+                const url = spellService.getSpellImageUrl(id);
+                return url ? <img key={i} src={url} alt="" className="sc-spell-icon" onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : null;
+              })}
+              {keystoneId && (() => {
+                const url = runeService.getRuneIconUrl(keystoneId);
+                return url ? <img src={url} alt="" className="sc-rune-icon" onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : null;
+              })()}
             </div>
             <div className="sc-player-info">
               <span className="sc-player-name">{name}</span>
@@ -139,8 +163,8 @@ const TeamTable = ({
 
           {/* CS */}
           <div className="sc-col-cs sc-stat">
-            <span className="sc-stat-val">{cs}</span>
-            <span className="sc-stat-sub">cs</span>
+            <span className="sc-stat-val">{csPerMin}</span>
+            <span className="sc-stat-sub">cs/m</span>
           </div>
 
           {/* Gold */}
@@ -204,8 +228,8 @@ export const MatchDetailModal = ({ match, puuid, onClose }: MatchDetailModalProp
 
         {/* Scrollable scoreboard body */}
         <div className="sc-body">
-          <TeamTable players={team100} label="Blue Side" side="blue" maxDmg={maxDmg} puuid={puuid} />
-          <TeamTable players={team200} label="Red Side"  side="red"  maxDmg={maxDmg} puuid={puuid} />
+          <TeamTable players={team100} label="Blue Side" side="blue" maxDmg={maxDmg} puuid={puuid} gameDuration={match.info.gameDuration} />
+          <TeamTable players={team200} label="Red Side"  side="red"  maxDmg={maxDmg} puuid={puuid} gameDuration={match.info.gameDuration} />
         </div>
       </div>
     </div>,

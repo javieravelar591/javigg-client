@@ -1,19 +1,15 @@
 import { useState } from 'react';
 import './MatchCard.css';
-import { MatchDetailModal } from './MatchDetailModal';
 
 import { DDRAGON } from '../../constants';
-
-interface MetaDataDto {
-  dataVersion: string;
-  matchId: string;
-  participants: string[];
-}
+import { spellService } from '../../services/spellService';
+import { runeService } from '../../services/runeService';
 
 interface InfoDto {
-  endOfGameResult: string;
   gameDuration: number;
   gameMode: string;
+  queueId: number;
+  gameEndTimestamp: number;
   participants: ParticipantDto[];
 }
 
@@ -22,54 +18,37 @@ interface ParticipantDto {
   champLevel: number;
   championId: number;
   championName: string;
-  damageDealtToBuildings: number;
   deaths: number;
   doubleKills: number;
-  dragonKills: number;
   goldEarned: number;
-  goldSpent: number;
-  item0: number;
-  item1: number;
-  item2: number;
-  item3: number;
-  item4: number;
-  item5: number;
-  item6: number;
+  item0: number; item1: number; item2: number;
+  item3: number; item4: number; item5: number; item6: number;
   kills: number;
-  lane: string;
-  magicDamageDealt: number;
-  magicDamageDealtToChampions: number;
   neutralMinionsKilled: number;
   pentaKills: number;
-  physicalDamageDealt: number;
-  physicalDamageDealtToChampions: number;
   profileIcon: number;
   puuid: string;
   quadraKills: number;
   riotIdGameName: string;
-  riotIdTagline: string;
-  role: string;
   teamId: number;
-  teamPosition: string;
-  totalDamageDealt: number;
   totalDamageDealtToChampions: number;
-  totalDamageTaken: number;
   totalMinionsKilled: number;
   tripleKills: number;
-  trueDamageDealt: number;
-  trueDamageDealtToChampions: number;
   visionScore: number;
   wardsPlaced: number;
   win: boolean;
-  individualPosition: string;
   summonerLevel: number;
   summonerName?: string;
+  summoner1Id: number;
+  summoner2Id: number;
+  perks?: {
+    styles: { description: string; selections: { perk: number }[] }[];
+  };
 }
 
 interface MatchDto {
-  metadata: MetaDataDto;
+  metadata: { matchId: string };
   info: InfoDto;
-  participants: ParticipantDto[];
 }
 
 interface MatchCardProps {
@@ -81,199 +60,298 @@ interface MatchCardProps {
   puuid: string;
 }
 
-const formatDuration = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${minutes}m ${secs}s`;
+// ── Queue name map ─────────────────────────────────────
+const QUEUE_NAMES: Record<number, string> = {
+  420: 'Ranked Solo', 440: 'Ranked Flex',
+  400: 'Normal Draft', 430: 'Normal Blind',
+  450: 'ARAM', 900: 'URF', 1020: 'One for All',
+  1400: 'Spellbook', 490: 'Quickplay', 0: 'Custom',
 };
 
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-  return num.toString();
+// ── Helpers ────────────────────────────────────────────
+const formatDuration = (s: number) =>
+  `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;
+
+const timeAgo = (ts: number): string => {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 };
 
-const getChampionImgUrl = (championName: string) =>
-  `${DDRAGON}/img/champion/${championName}.png`;
+const kdaRatio = (k: number, d: number, a: number) =>
+  d === 0 ? 'Perfect' : ((k + a) / d).toFixed(2);
 
-const getItemImgUrl = (itemId: number) =>
-  `${DDRAGON}/img/item/${itemId}.png`;
-
-const getKdaRatio = (kills: number, deaths: number, assists: number): string => {
-  if (deaths === 0) return 'Perfect';
-  return ((kills + assists) / deaths).toFixed(2);
-};
-
-const getKdaColor = (kills: number, deaths: number, assists: number): string => {
-  if (deaths === 0) return '#ffd700';
-  const ratio = (kills + assists) / deaths;
-  if (ratio >= 5) return '#ffd700';
-  if (ratio >= 3) return '#00d4ff';
-  if (ratio >= 2) return '#0aca00';
-  if (ratio >= 1) return '#b0b0b0';
+const kdaColor = (k: number, d: number, a: number) => {
+  if (d === 0) return '#ffd700';
+  const r = (k + a) / d;
+  if (r >= 5) return '#ffd700';
+  if (r >= 3) return '#00d4ff';
+  if (r >= 2) return '#0aca00';
+  if (r >= 1) return '#b0b0b0';
   return '#ff6666';
 };
 
-const getMultiKill = (p: ParticipantDto): string | null => {
-  if (p.pentaKills > 0) return 'PENTA KILL';
-  if (p.quadraKills > 0) return 'QUADRA KILL';
-  if (p.tripleKills > 0) return 'TRIPLE KILL';
-  if (p.doubleKills > 0) return 'DOUBLE KILL';
+const fmt = (n: number) => n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
+
+const multiKillLabel = (p: ParticipantDto) => {
+  if (p.pentaKills > 0) return 'PENTA';
+  if (p.quadraKills > 0) return 'QUADRA';
+  if (p.tripleKills > 0) return 'TRIPLE';
+  if (p.doubleKills > 0) return 'DOUBLE';
   return null;
 };
 
-const getItems = (p: ParticipantDto): number[] =>
-  [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
+const truncate = (s: string, n: number) => s.length > n ? s.slice(0, n) + '…' : s;
 
-export const MatchCard = ({
-  match,
-  puuid,
-}: MatchCardProps) => {
-  const [showModal, setShowModal] = useState(false);
-  const currentPlayer = match.info.participants.find((p) => p.puuid === puuid);
-  const isVictory = currentPlayer?.win ?? false;
+// ── Sub-components ─────────────────────────────────────
+const ItemSlot = ({ id, size = 28 }: { id: number; size?: number }) => (
+  <div className="mc-item-slot" style={{ width: size, height: size }}>
+    {id > 0 && (
+      <img src={`${DDRAGON}/img/item/${id}.png`} alt=""
+        onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+    )}
+  </div>
+);
 
-  const team100 = match.info.participants.filter((p) => p.teamId === 100);
-  const team200 = match.info.participants.filter((p) => p.teamId === 200);
+const ScItemSlot = ({ id }: { id: number }) => (
+  <div className="sc-item-slot">
+    {id > 0 && (
+      <img src={`${DDRAGON}/img/item/${id}.png`} alt=""
+        onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+    )}
+  </div>
+);
 
-  const multiKill = currentPlayer ? getMultiKill(currentPlayer) : null;
-  const cs = currentPlayer
-    ? (currentPlayer.totalMinionsKilled ?? 0) + (currentPlayer.neutralMinionsKilled ?? 0)
-    : 0;
-
-  return (
-    <div className={`match-card ${isVictory ? 'victory' : 'defeat'}`}>
-      {/* Header */}
-      <div className="match-card-header">
-        <div className={`match-result ${isVictory ? 'victory' : 'defeat'}`}>
-          {isVictory ? 'VICTORY' : 'DEFEAT'}
-        </div>
-        <div className="match-meta">
-          <span className="match-mode">{match.info.gameMode}</span>
-          <span className="match-sep">·</span>
-          <span className="match-duration">{formatDuration(match.info.gameDuration)}</span>
-        </div>
-      </div>
-
-      {/* Current player hero section */}
-      {currentPlayer && (
-        <div className="match-hero">
-          <div className="hero-left">
-            <div className="hero-champ-wrapper">
-              <img
-                src={getChampionImgUrl(currentPlayer.championName)}
-                alt={currentPlayer.championName}
-                className="champ-portrait"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-              <span className="champ-level">Lv.{currentPlayer.champLevel}</span>
+const TeamTable = ({
+  players, side, maxDmg, puuid, gameDuration,
+}: {
+  players: ParticipantDto[];
+  side: 'blue' | 'red';
+  maxDmg: number;
+  puuid: string;
+  gameDuration: number;
+}) => (
+  <div className={`sc-team sc-team-${side}`}>
+    <div className="sc-team-header">
+      <span className="sc-team-label">{side === 'blue' ? 'Blue Side' : 'Red Side'}</span>
+      <span className={`sc-team-result ${players[0]?.win ? 'win' : 'loss'}`}>
+        {players[0]?.win ? 'Victory' : 'Defeat'}
+      </span>
+    </div>
+    <div className="sc-col-headers">
+      <span className="sc-col-champ">Champion</span>
+      <span className="sc-col-kda">KDA</span>
+      <span className="sc-col-cs">CS/m</span>
+      <span className="sc-col-gold">Gold</span>
+      <span className="sc-col-dmg">Damage</span>
+      <span className="sc-col-wards">Wards</span>
+      <span className="sc-col-items">Items</span>
+    </div>
+    {players.map((p) => {
+      const cs = (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0);
+      const csPerMin = gameDuration > 0 ? (cs / (gameDuration / 60)).toFixed(1) : '0.0';
+      const keystoneId = p.perks?.styles?.[0]?.selections?.[0]?.perk ?? null;
+      const isMe = p.puuid === puuid;
+      const name = p.riotIdGameName || p.summonerName || '—';
+      return (
+        <div key={p.puuid} className={`sc-row ${isMe ? 'sc-row-me' : ''}`}>
+          <div className="sc-col-champ">
+            <div className="sc-champ-wrap">
+              <img src={`${DDRAGON}/img/champion/${p.championName}.png`} alt={p.championName}
+                className="sc-champ-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              <span className="sc-champ-level">{p.champLevel}</span>
             </div>
-            <div className="hero-info">
-              <div className="hero-champ-name">{currentPlayer.championName}</div>
-              <div className="hero-kda">
-                <span className="kda-nums">
-                  <span className="kda-k">{currentPlayer.kills}</span>
-                  <span className="kda-sep"> / </span>
-                  <span className="kda-d">{currentPlayer.deaths}</span>
-                  <span className="kda-sep"> / </span>
-                  <span className="kda-a">{currentPlayer.assists}</span>
-                </span>
-                <span
-                  className="kda-ratio"
-                  style={{ color: getKdaColor(currentPlayer.kills, currentPlayer.deaths, currentPlayer.assists) }}
-                >
-                  {getKdaRatio(currentPlayer.kills, currentPlayer.deaths, currentPlayer.assists)} KDA
-                </span>
-              </div>
-              {multiKill && <div className="multi-kill-badge">{multiKill}</div>}
-              <div className="hero-secondary-stats">
-                <span>{cs} CS</span>
-                <span className="stat-sep">·</span>
-                <span>{formatNumber(currentPlayer.totalDamageDealtToChampions)} DMG</span>
-                {currentPlayer.visionScore > 0 && (
-                  <>
-                    <span className="stat-sep">·</span>
-                    <span>{currentPlayer.visionScore} Vision</span>
-                  </>
-                )}
-              </div>
+            <div className="sc-spells-rune">
+              {[p.summoner1Id, p.summoner2Id].map((id, i) => {
+                const url = spellService.getSpellImageUrl(id);
+                return url ? <img key={i} src={url} alt="" className="sc-spell-icon"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : null;
+              })}
+              {keystoneId && (() => {
+                const url = runeService.getRuneIconUrl(keystoneId);
+                return url ? <img src={url} alt="" className="sc-rune-icon"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : null;
+              })()}
+            </div>
+            <div className="sc-player-info">
+              <span className="sc-player-name">{name}</span>
+              <span className="sc-champ-name">{p.championName}</span>
             </div>
           </div>
-          <div className="items-row">
-            {getItems(currentPlayer).map((itemId, idx) => (
-              <div key={idx} className={`item-slot ${itemId === 0 ? 'empty' : ''}`}>
-                {itemId > 0 && (
-                  <img
-                    src={getItemImgUrl(itemId)}
-                    alt={`Item ${itemId}`}
-                    className="item-icon"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                )}
+          <div className="sc-col-kda">
+            <span className="sc-kda-nums">
+              <span className="sc-k">{p.kills}</span>
+              <span className="sc-sep">/</span>
+              <span className="sc-d">{p.deaths}</span>
+              <span className="sc-sep">/</span>
+              <span className="sc-a">{p.assists}</span>
+            </span>
+            <span className="sc-kda-ratio" style={{ color: kdaColor(p.kills, p.deaths, p.assists) }}>
+              {kdaRatio(p.kills, p.deaths, p.assists)} KDA
+            </span>
+          </div>
+          <div className="sc-col-cs sc-stat">
+            <span className="sc-stat-val">{csPerMin}</span>
+          </div>
+          <div className="sc-col-gold sc-stat">
+            <span className="sc-stat-val sc-gold">{fmt(p.goldEarned)}</span>
+          </div>
+          <div className="sc-col-dmg">
+            <div className="sc-dmg-bar-track">
+              <div className={`sc-dmg-bar-fill sc-dmg-${side}`}
+                style={{ width: `${(p.totalDamageDealtToChampions / maxDmg) * 100}%` }} />
+            </div>
+            <span className="sc-dmg-val">{fmt(p.totalDamageDealtToChampions)}</span>
+          </div>
+          <div className="sc-col-wards sc-stat">
+            <span className="sc-stat-val">{p.wardsPlaced}</span>
+            <span className="sc-stat-sub">{p.visionScore > 0 ? `${p.visionScore}vs` : ''}</span>
+          </div>
+          <div className="sc-col-items">
+            {[p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6].map((id, i) => (
+              <ScItemSlot key={i} id={id} />
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+);
+
+// ── Main component ─────────────────────────────────────
+export const MatchCard = ({ match, puuid }: MatchCardProps) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const me = match.info.participants.find((p) => p.puuid === puuid);
+  const isVictory = me?.win ?? false;
+  const team100 = match.info.participants.filter((p) => p.teamId === 100);
+  const team200 = match.info.participants.filter((p) => p.teamId === 200);
+  const maxDmg = Math.max(...match.info.participants.map((p) => p.totalDamageDealtToChampions), 1);
+
+  const cs = me ? (me.totalMinionsKilled ?? 0) + (me.neutralMinionsKilled ?? 0) : 0;
+  const csPerMin = match.info.gameDuration > 0
+    ? (cs / (match.info.gameDuration / 60)).toFixed(1) : '0.0';
+  const keystoneId = me?.perks?.styles?.[0]?.selections?.[0]?.perk ?? null;
+  const spell1Url = me ? spellService.getSpellImageUrl(me.summoner1Id) : null;
+  const spell2Url = me ? spellService.getSpellImageUrl(me.summoner2Id) : null;
+  const keystoneUrl = keystoneId ? runeService.getRuneIconUrl(keystoneId) : null;
+  const queueLabel = QUEUE_NAMES[match.info.queueId] ?? match.info.gameMode;
+  const multiKill = me ? multiKillLabel(me) : null;
+
+  return (
+    <div className={`mc ${isVictory ? 'mc-win' : 'mc-loss'}`}>
+
+      {/* ── Main row ── */}
+      <div className="mc-row">
+
+        {/* Col 1 — Result */}
+        <div className="mc-col mc-col-result">
+          <span className="mc-queue">{queueLabel}</span>
+          <span className={`mc-outcome ${isVictory ? 'win' : 'loss'}`}>
+            {isVictory ? 'Victory' : 'Defeat'}
+          </span>
+          <span className="mc-ago">
+            {match.info.gameEndTimestamp ? timeAgo(match.info.gameEndTimestamp) : ''}
+          </span>
+          <span className="mc-dur">{formatDuration(match.info.gameDuration)}</span>
+        </div>
+
+        {/* Col 2 — Champion + Spells/Rune */}
+        {me && (
+          <div className="mc-col mc-col-champ">
+            <div className="mc-champ-cluster">
+              <div className="mc-portrait-wrap">
+                <img src={`${DDRAGON}/img/champion/${me.championName}.png`} alt={me.championName}
+                  className="mc-portrait" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                <span className="mc-lvl">{me.champLevel}</span>
+              </div>
+              <div className="mc-sr">
+                {spell1Url && <img src={spell1Url} alt="" className="mc-spell" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+                {spell2Url && <img src={spell2Url} alt="" className="mc-spell" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+                {keystoneUrl && <img src={keystoneUrl} alt="" className="mc-rune" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+              </div>
+            </div>
+            <span className="mc-champ-name">{me.championName}</span>
+          </div>
+        )}
+
+        {/* Col 3 — Stats */}
+        {me && (
+          <div className="mc-col mc-col-stats">
+            <div className="mc-kda-nums">
+              <span className="mc-k">{me.kills}</span>
+              <span className="mc-sep"> / </span>
+              <span className="mc-d">{me.deaths}</span>
+              <span className="mc-sep"> / </span>
+              <span className="mc-a">{me.assists}</span>
+            </div>
+            <span className="mc-kda-ratio" style={{ color: kdaColor(me.kills, me.deaths, me.assists) }}>
+              {kdaRatio(me.kills, me.deaths, me.assists)} KDA
+            </span>
+            {multiKill && <span className="mc-multikill">{multiKill} KILL</span>}
+            <div className="mc-secondaries">
+              <span>{cs} CS <span className="mc-cspm">({csPerMin})</span></span>
+              <span>{me.visionScore} Vision</span>
+            </div>
+          </div>
+        )}
+
+        {/* Col 4 — Items */}
+        {me && (
+          <div className="mc-col mc-col-items">
+            <div className="mc-items-main">
+              {[me.item0, me.item1, me.item2, me.item3, me.item4, me.item5].map((id, i) => (
+                <ItemSlot key={i} id={id} size={28} />
+              ))}
+            </div>
+            <div className="mc-trinket">
+              <ItemSlot id={me.item6} size={24} />
+            </div>
+          </div>
+        )}
+
+        {/* Col 5 — Participants */}
+        <div className="mc-col mc-col-players">
+          <div className="mc-team-col">
+            {team100.map((p) => (
+              <div key={p.puuid} className={`mc-player ${p.puuid === puuid ? 'mc-me' : ''}`}>
+                <img src={`${DDRAGON}/img/champion/${p.championName}.png`} alt={p.championName}
+                  className="mc-p-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                <span className="mc-p-name">{truncate(p.riotIdGameName || p.summonerName || '—', 9)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mc-team-col">
+            {team200.map((p) => (
+              <div key={p.puuid} className={`mc-player ${p.puuid === puuid ? 'mc-me' : ''}`}>
+                <img src={`${DDRAGON}/img/champion/${p.championName}.png`} alt={p.championName}
+                  className="mc-p-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                <span className="mc-p-name">{truncate(p.riotIdGameName || p.summonerName || '—', 9)}</span>
               </div>
             ))}
           </div>
         </div>
-      )}
 
-      {/* Teams */}
-      <div className="teams-container">
-        <div className="team team-100">
-          <div className="team-label">Blue Team</div>
-          {team100.map((p) => (
-            <div
-              key={p.puuid}
-              className={`player-row ${p.puuid === puuid ? 'current-player' : ''}`}
-            >
-              <img
-                src={getChampionImgUrl(p.championName)}
-                alt={p.championName}
-                className="player-champ-icon"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-              <div className="player-name">{p.riotIdGameName || p.summonerName || '—'}</div>
-              <div className="player-stats-mini">
-                <span className="kda">{p.kills}/{p.deaths}/{p.assists}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Toggle button */}
+        <button className={`mc-expand ${expanded ? 'open' : ''}`}
+          onClick={() => setExpanded(!expanded)} title="Toggle scoreboard">
+          ›
+        </button>
+      </div>
 
-        <div className="team team-200">
-          <div className="team-label">Red Team</div>
-          {team200.map((p) => (
-            <div
-              key={p.puuid}
-              className={`player-row ${p.puuid === puuid ? 'current-player' : ''}`}
-            >
-              <img
-                src={getChampionImgUrl(p.championName)}
-                alt={p.championName}
-                className="player-champ-icon"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-              <div className="player-name">{p.riotIdGameName || p.summonerName || '—'}</div>
-              <div className="player-stats-mini">
-                <span className="kda">{p.kills}/{p.deaths}/{p.assists}</span>
-              </div>
-            </div>
-          ))}
+      {/* ── Expanded scoreboard panel ── */}
+      <div className={`mc-panel ${expanded ? 'mc-panel-open' : ''}`}>
+        <div className="mc-panel-inner">
+          <TeamTable players={team100} side="blue" maxDmg={maxDmg} puuid={puuid}
+            gameDuration={match.info.gameDuration} />
+          <TeamTable players={team200} side="red" maxDmg={maxDmg} puuid={puuid}
+            gameDuration={match.info.gameDuration} />
         </div>
       </div>
 
-      {/* View details button */}
-      <button className="expand-btn" onClick={() => setShowModal(true)}>
-        ▼ View Full Scoreboard
-      </button>
-
-      {/* Scoreboard modal */}
-      {showModal && (
-        <MatchDetailModal
-          match={match}
-          puuid={puuid}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </div>
   );
 };
