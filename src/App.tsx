@@ -6,6 +6,7 @@ import { MatchCard } from './components/MatchCard'
 import { MatchCardSkeleton } from './components/MatchCard/MatchCardSkeleton'
 import { ChampionsPage } from './components/ChampionsPage'
 import { championService, type ChampionData } from './services/championService'
+import { saveRecentSearch } from './services/recentSearches'
 
 interface LivePlayerDto {
   puuid: string
@@ -18,6 +19,7 @@ interface LivePlayerDto {
     lossStreak: number
     status: 'HOT' | 'COLD' | 'NEUTRAL'
   }
+  tags: string[]
 }
 
 interface LiveGameLobbyDto {
@@ -161,6 +163,7 @@ function App() {
 
       const data = await response.json()
       setSummonerData(data)
+      saveRecentSearch(gameName, tagLine)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setSummonerData(null)
@@ -370,12 +373,17 @@ function App() {
                                     <div className="live-player-info">
                                       <div className="live-player-name">{p.summonerName ?? '—'}</div>
                                     </div>
-                                    {p.streak.status === 'HOT' && (
-                                      <span className="live-streak hot">{p.streak.winStreak}W HOT</span>
-                                    )}
-                                    {p.streak.status === 'COLD' && (
-                                      <span className="live-streak cold">{p.streak.lossStreak}L COLD</span>
-                                    )}
+                                    <div className="live-player-badges">
+                                      {p.streak.status === 'HOT' && (
+                                        <span className="live-streak hot">{p.streak.winStreak}W HOT</span>
+                                      )}
+                                      {p.streak.status === 'COLD' && (
+                                        <span className="live-streak cold">{p.streak.lossStreak}L COLD</span>
+                                      )}
+                                      {p.tags?.map(tag => (
+                                        <span key={tag} className={`live-tag live-tag--${tag.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</span>
+                                      ))}
+                                    </div>
                                   </div>
                                 )
                               })}
