@@ -156,7 +156,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}`
+        `${import.meta.env.VITE_API_URL ?? ''}/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}`
       )
 
       if (!response.ok) throw new Error('Failed to fetch summoner data')
@@ -178,7 +178,7 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`/live-game?puuid=${encodeURIComponent(summonerData.summoner.puuid)}`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/live-game?puuid=${encodeURIComponent(summonerData.summoner.puuid)}`)
       if (!response.ok) throw new Error('Failed to fetch live game')
 
       const data: LiveGameLobbyDto = await response.json()
