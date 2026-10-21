@@ -118,6 +118,14 @@ interface RankedEntry {
   losses: number
 }
 
+// Maps the backend's error statuses (see javigg README) to something a user can act on.
+function apiErrorMessage(status: number, notFound: string): string {
+  if (status === 404) return notFound
+  if (status === 400) return 'Please enter a valid Riot ID (name and tag)'
+  if (status === 503) return 'JaviGG is busy right now, please try again in a few seconds'
+  return 'Something went wrong talking to Riot, please try again later'
+}
+
 interface SummonerData {
   summoner: {
     puuid: string
@@ -159,7 +167,7 @@ function App() {
         `${import.meta.env.VITE_API_URL ?? ''}/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}`
       )
 
-      if (!response.ok) throw new Error('Failed to fetch summoner data')
+      if (!response.ok) throw new Error(apiErrorMessage(response.status, 'Summoner not found, check the name and tag'))
 
       const data = await response.json()
       setSummonerData(data)
@@ -179,7 +187,7 @@ function App() {
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/live-game?puuid=${encodeURIComponent(summonerData.summoner.puuid)}`)
-      if (!response.ok) throw new Error('Failed to fetch live game')
+      if (!response.ok) throw new Error(apiErrorMessage(response.status, 'This player is not currently in a game'))
 
       const data: LiveGameLobbyDto = await response.json()
       setLiveGame(data)

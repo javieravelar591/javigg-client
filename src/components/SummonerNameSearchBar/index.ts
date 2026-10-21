@@ -1,1 +1,0 @@
-export { SummonerNameSearchBar } from './SummonerNameSearchBar';

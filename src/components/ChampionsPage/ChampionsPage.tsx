@@ -18,25 +18,15 @@ const StatBar = ({ label, value }: { label: string; value: number }) => (
 )
 
 export const ChampionsPage = () => {
-  const [champions, setChampions] = useState<ChampionData[]>([])
-  const [loading, setLoading] = useState(true)
+  // Champion data is bundled, so it's available synchronously on first render.
+  const champions = championService.getAllChampions()
   const [selectedChampion, setSelectedChampion] = useState<ChampionData | null>(null)
-
-  useEffect(() => {
-    const allChampions = championService.getAllChampions()
-    setChampions(allChampions)
-    setLoading(false)
-  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedChampion(null) }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
-
-  if (loading) {
-    return <div className="champions-page"><div className="loading">Loading champions...</div></div>
-  }
 
   return (
     <div className="champions-page">

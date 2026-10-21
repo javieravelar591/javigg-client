@@ -121,7 +121,7 @@ class ChampionService {
         this.detailedChampions.set(championId, champData);
         return champData;
       }
-    } catch (error) {
+    } catch {
       console.warn(`Failed to load detailed data for ${championId}`);
     }
 
