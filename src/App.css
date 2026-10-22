@@ -535,11 +535,5 @@
   .profile-sidebar .insights-card { min-width: 0; }
 }
 
-/* Ranked badge styling now lives in components/RankedBadge/RankedBadge.css */
-
-.ranked-badges-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin-bottom: 6px;
-}
+/* Ranked badge styling now lives in components/RankedBadge/RankedBadge.css and
+   components/RankedSummary/RankedSummary.css */

@@ -26,10 +26,12 @@ export const RankedBadge: React.FC<RankedBadgeProps> = ({ queueLabel, entry }) =
         <span className="ranked-queue-label">{queueLabel}</span>
         {entry ? (
           <>
-            <span className={`ranked-tier ranked-tier-${entry.tier.toLowerCase()}`}>
-              {entry.tier} {entry.rank}
-            </span>
-            <span className="ranked-lp">{entry.leaguePoints} LP</span>
+            <div className="ranked-tier-row">
+              <span className={`ranked-tier ranked-tier-${entry.tier.toLowerCase()}`}>
+                {entry.tier} {entry.rank}
+              </span>
+              <span className="ranked-lp">{entry.leaguePoints} LP</span>
+            </div>
             <span className="ranked-record">{entry.wins}W {entry.losses}L</span>
           </>
         ) : (

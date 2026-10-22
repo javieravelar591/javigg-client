@@ -1,20 +1,26 @@
 .ranked-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 12px;
 }
 
 .ranked-emblem {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .ranked-badge-text {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ranked-tier-row {
+  display: flex;
+  align-items: baseline;
   gap: 8px;
   flex-wrap: wrap;
 }
