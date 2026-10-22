@@ -17,11 +17,13 @@ interface RankedBadgeProps {
 export const RankedBadge: React.FC<RankedBadgeProps> = ({ queueLabel, entry }) => {
   return (
     <div className="ranked-badge">
-      <img
-        src={getRankEmblemUrl(entry?.tier)}
-        alt={entry ? `${entry.tier} ${entry.rank}` : 'Unranked'}
-        className="ranked-emblem"
-      />
+      <div className="ranked-emblem-wrap">
+        <img
+          src={getRankEmblemUrl(entry?.tier)}
+          alt={entry ? `${entry.tier} ${entry.rank}` : 'Unranked'}
+          className={`ranked-emblem${entry ? ' ranked-emblem--tiered' : ''}`}
+        />
+      </div>
       <div className="ranked-badge-text">
         <span className="ranked-queue-label">{queueLabel}</span>
         {entry ? (
