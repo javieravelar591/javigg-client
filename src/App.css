@@ -203,6 +203,18 @@
   font-family: 'Inter', sans-serif;
 }
 
+.region-badge {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.5px;
+  color: #C89B3C;
+  background: rgba(200, 155, 60, 0.12);
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
 .summoner-stats-row {
   display: flex;
   align-items: center;
