@@ -118,7 +118,7 @@
 /* ── Results layout ──────────────────────────────────── */
 .results-section {
   width: 100%;
-  max-width: 900px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -281,14 +281,27 @@
 }
 
 /* ── Match history ───────────────────────────────────── */
-.insights-row {
+/* ── Profile body: sidebar (champion/role stats) + main (match history) ── */
+.profile-body {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin: 24px 0;
+  align-items: flex-start;
+  gap: 24px;
 }
 
-.matches-section { margin-top: 8px; }
+.profile-sidebar {
+  flex: 0 0 300px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.matches-section { margin-top: 0; }
 
 .matches-title {
   font-family: 'Rajdhani', sans-serif;
@@ -498,6 +511,9 @@
 @media (max-width: 900px) {
   .app-container { padding: 32px 20px; }
   .results-section { max-width: 100%; }
+  .profile-body { flex-direction: column; }
+  .profile-sidebar { width: 100%; flex: 0 0 auto; flex-direction: row; flex-wrap: wrap; }
+  .profile-sidebar .insights-card { min-width: 260px; }
 }
 
 @media (max-width: 768px) {
@@ -515,6 +531,8 @@
   .app-header h1 { font-size: 32px; letter-spacing: 4px; }
   .summoner-icon { width: 80px; height: 80px; }
   .summoner-info h2 { font-size: 24px; }
+  .profile-sidebar { flex-direction: column; }
+  .profile-sidebar .insights-card { min-width: 0; }
 }
 
 /* Ranked badge styling now lives in components/RankedBadge/RankedBadge.css */

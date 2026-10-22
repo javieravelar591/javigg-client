@@ -333,93 +333,97 @@ function App() {
                   </div>
                 </div>
 
-                <div className="insights-row">
-                  <ChampionBreakdown stats={summonerData.championStats} />
-                  <RoleBreakdown stats={summonerData.roleStats} />
-                </div>
-
                 {error && <div className="error-message">{error}</div>}
 
-                {liveGame && (() => {
-                  const allChampions = championService.getAllChampions()
-                  const getChampName = (championId: number) =>
-                    allChampions.find((c) => c.key === championId.toString())?.id ?? null
+                <div className="profile-body">
+                  <aside className="profile-sidebar">
+                    <ChampionBreakdown stats={summonerData.championStats} />
+                    <RoleBreakdown stats={summonerData.roleStats} />
+                  </aside>
 
-                  return (
-                    <div className="live-game-section">
-                      <div className="live-game-header">
-                        <span className="live-badge">
-                          <span className="live-dot" />
-                          Live
-                        </span>
-                        <span className="live-game-mode">{liveGame.gameMode}</span>
-                      </div>
-                      <div className="live-game-teams">
-                        {([['100', 'blue'], ['200', 'red']] as const).map(([teamId, side]) => (
-                          <div key={teamId} className={`live-team ${side}`}>
-                            <div className="live-team-label">{side === 'blue' ? 'Blue Side' : 'Red Side'}</div>
-                            {liveGame.players
-                              .filter((p) => p.teamId.toString() === teamId)
-                              .map((p) => {
-                                const champName = getChampName(p.championId)
-                                return (
-                                  <div key={p.puuid} className={`live-player-row ${p.puuid === summonerData.summoner.puuid ? 'is-current' : ''}`}>
-                                    {champName ? (
-                                      <img
-                                        src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/champion/${champName}.png`}
-                                        alt={champName}
-                                        className="live-champ-portrait"
-                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                      />
-                                    ) : (
-                                      <img
-                                        src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/profileicon/${p.profileIconId}.png`}
-                                        alt="profile"
-                                        className="live-champ-portrait"
-                                      />
-                                    )}
-                                    <div className="live-player-info">
-                                      <div className="live-player-name">{p.summonerName ?? '—'}</div>
-                                    </div>
-                                    <div className="live-player-badges">
-                                      {p.streak.status === 'HOT' && (
-                                        <span className="live-streak hot">{p.streak.winStreak}W HOT</span>
-                                      )}
-                                      {p.streak.status === 'COLD' && (
-                                        <span className="live-streak cold">{p.streak.lossStreak}L COLD</span>
-                                      )}
-                                      {p.tags?.map(tag => (
-                                        <span key={tag} className={`live-tag live-tag--${tag.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )
-                              })}
+                  <div className="profile-main">
+                    {liveGame && (() => {
+                      const allChampions = championService.getAllChampions()
+                      const getChampName = (championId: number) =>
+                        allChampions.find((c) => c.key === championId.toString())?.id ?? null
+
+                      return (
+                        <div className="live-game-section">
+                          <div className="live-game-header">
+                            <span className="live-badge">
+                              <span className="live-dot" />
+                              Live
+                            </span>
+                            <span className="live-game-mode">{liveGame.gameMode}</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })()}
+                          <div className="live-game-teams">
+                            {([['100', 'blue'], ['200', 'red']] as const).map(([teamId, side]) => (
+                              <div key={teamId} className={`live-team ${side}`}>
+                                <div className="live-team-label">{side === 'blue' ? 'Blue Side' : 'Red Side'}</div>
+                                {liveGame.players
+                                  .filter((p) => p.teamId.toString() === teamId)
+                                  .map((p) => {
+                                    const champName = getChampName(p.championId)
+                                    return (
+                                      <div key={p.puuid} className={`live-player-row ${p.puuid === summonerData.summoner.puuid ? 'is-current' : ''}`}>
+                                        {champName ? (
+                                          <img
+                                            src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/champion/${champName}.png`}
+                                            alt={champName}
+                                            className="live-champ-portrait"
+                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/profileicon/${p.profileIconId}.png`}
+                                            alt="profile"
+                                            className="live-champ-portrait"
+                                          />
+                                        )}
+                                        <div className="live-player-info">
+                                          <div className="live-player-name">{p.summonerName ?? '—'}</div>
+                                        </div>
+                                        <div className="live-player-badges">
+                                          {p.streak.status === 'HOT' && (
+                                            <span className="live-streak hot">{p.streak.winStreak}W HOT</span>
+                                          )}
+                                          {p.streak.status === 'COLD' && (
+                                            <span className="live-streak cold">{p.streak.lossStreak}L COLD</span>
+                                          )}
+                                          {p.tags?.map(tag => (
+                                            <span key={tag} className={`live-tag live-tag--${tag.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })()}
 
-                {!liveGame && (
-                  <div className="matches-section">
-                    <h3 className="matches-title">Match History ({summonerData.matchHistory.length})</h3>
-                    <div className="matches-grid">
-                      {summonerData.matchDetails.map((match) => (
-                        <MatchCard
-                          key={match.metadata.matchId}
-                          match={match}
-                          gameName={summonerData.account.gameName}
-                          tagLine={summonerData.account.tagLine}
-                          profileIconId={summonerData.summoner.profileIconId}
-                          summonerLevel={summonerData.summoner.summonerLevel}
-                          puuid={summonerData.summoner.puuid}
-                        />
-                      ))}
-                    </div>
+                    {!liveGame && (
+                      <div className="matches-section">
+                        <h3 className="matches-title">Match History ({summonerData.matchHistory.length})</h3>
+                        <div className="matches-grid">
+                          {summonerData.matchDetails.map((match) => (
+                            <MatchCard
+                              key={match.metadata.matchId}
+                              match={match}
+                              gameName={summonerData.account.gameName}
+                              tagLine={summonerData.account.tagLine}
+                              profileIconId={summonerData.summoner.profileIconId}
+                              summonerLevel={summonerData.summoner.summonerLevel}
+                              puuid={summonerData.summoner.puuid}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             )}
           </>
