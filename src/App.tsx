@@ -7,6 +7,7 @@ import { MatchCardSkeleton } from './components/MatchCard/MatchCardSkeleton'
 import { ChampionsPage } from './components/ChampionsPage'
 import { championService, type ChampionData } from './services/championService'
 import { saveRecentSearch } from './services/recentSearches'
+import { REGIONS } from './services/regions'
 
 interface LivePlayerDto {
   puuid: string
@@ -146,6 +147,9 @@ function App() {
   const [error, setError] = useState('')
   const [navOpen, setNavOpen] = useState(false)
   const [backdropChampion, setBackdropChampion] = useState<{ champion: ChampionData; skinNum: number } | null>(null)
+  // The region a search was run with. /live-game needs it too, since a summoner's active game
+  // lives on the same shard as their profile.
+  const [searchRegion, setSearchRegion] = useState('NA1')
 
   useEffect(() => {
     const loadChampionBackdrop = async () => {
@@ -157,21 +161,22 @@ function App() {
     loadChampionBackdrop()
   }, [])
 
-  const handleSearch = async (gameName: string, tagLine: string) => {
+  const handleSearch = async (gameName: string, tagLine: string, region: string) => {
     setLoading(true)
     setError('')
     setLiveGame(null)
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL ?? ''}/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}`
+        `${import.meta.env.VITE_API_URL ?? ''}/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}&region=${encodeURIComponent(region)}`
       )
 
       if (!response.ok) throw new Error(apiErrorMessage(response.status, 'Summoner not found, check the name and tag'))
 
       const data = await response.json()
       setSummonerData(data)
-      saveRecentSearch(gameName, tagLine)
+      setSearchRegion(region)
+      saveRecentSearch(gameName, tagLine, region)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setSummonerData(null)
@@ -186,7 +191,7 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/live-game?puuid=${encodeURIComponent(summonerData.summoner.puuid)}`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/live-game?puuid=${encodeURIComponent(summonerData.summoner.puuid)}&region=${encodeURIComponent(searchRegion)}`)
       if (!response.ok) throw new Error(apiErrorMessage(response.status, 'This player is not currently in a game'))
 
       const data: LiveGameLobbyDto = await response.json()
@@ -298,6 +303,7 @@ function App() {
                     <h2>
                       {summonerData.account.gameName}
                       <span className="tagline">#{summonerData.account.tagLine}</span>
+                      <span className="region-badge">{REGIONS.find(r => r.code === searchRegion)?.label ?? searchRegion}</span>
                     </h2>
                     {summonerData.rankedSolo ? (
                       <div className="ranked-badge">
