@@ -5,6 +5,10 @@ import { CombinedSearchBar } from './components/CombinedSearchBar'
 import { MatchCard } from './components/MatchCard'
 import { MatchCardSkeleton } from './components/MatchCard/MatchCardSkeleton'
 import { ChampionsPage } from './components/ChampionsPage'
+import { type RankedEntry } from './components/RankedBadge'
+import { RankedSummary } from './components/RankedSummary'
+import { ChampionBreakdown, type ChampionStat } from './components/ChampionBreakdown'
+import { RoleBreakdown, type RoleStat } from './components/RoleBreakdown'
 import { championService, type ChampionData } from './services/championService'
 import { saveRecentSearch } from './services/recentSearches'
 import { REGIONS } from './services/regions'
@@ -111,14 +115,6 @@ interface Account {
   gameName: string
   tagLine: string
 }
-interface RankedEntry {
-  tier: string
-  rank: string
-  leaguePoints: number
-  wins: number
-  losses: number
-}
-
 // Maps the backend's error statuses (see javigg README) to something a user can act on.
 function apiErrorMessage(status: number, notFound: string): string {
   if (status === 404) return notFound
@@ -137,6 +133,9 @@ interface SummonerData {
   matchHistory: string[]
   matchDetails: MatchDto[]
   rankedSolo: RankedEntry | null
+  rankedFlex: RankedEntry | null
+  championStats: ChampionStat[]
+  roleStats: RoleStat[]
 }
 
 function App() {
@@ -305,19 +304,6 @@ function App() {
                       <span className="tagline">#{summonerData.account.tagLine}</span>
                       <span className="region-badge">{REGIONS.find(r => r.code === searchRegion)?.label ?? searchRegion}</span>
                     </h2>
-                    {summonerData.rankedSolo ? (
-                      <div className="ranked-badge">
-                        <span className={`ranked-tier ranked-tier-${summonerData.rankedSolo.tier.toLowerCase()}`}>
-                          {summonerData.rankedSolo.tier} {summonerData.rankedSolo.rank}
-                        </span>
-                        <span className="ranked-lp">{summonerData.rankedSolo.leaguePoints} LP</span>
-                        <span className="ranked-record">
-                          {summonerData.rankedSolo.wins}W {summonerData.rankedSolo.losses}L
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="ranked-badge"><span className="ranked-tier ranked-tier-unranked">Unranked</span></div>
-                    )}
                     {matchStats && (
                       <div className="summoner-stats-row">
                         <span className="stat-wins">{matchStats.wins}W</span>
@@ -346,86 +332,96 @@ function App() {
 
                 {error && <div className="error-message">{error}</div>}
 
-                {liveGame && (() => {
-                  const allChampions = championService.getAllChampions()
-                  const getChampName = (championId: number) =>
-                    allChampions.find((c) => c.key === championId.toString())?.id ?? null
+                <div className="profile-body">
+                  <aside className="profile-sidebar">
+                    <RankedSummary solo={summonerData.rankedSolo} flex={summonerData.rankedFlex} />
+                    <ChampionBreakdown stats={summonerData.championStats} />
+                    <RoleBreakdown stats={summonerData.roleStats} />
+                  </aside>
 
-                  return (
-                    <div className="live-game-section">
-                      <div className="live-game-header">
-                        <span className="live-badge">
-                          <span className="live-dot" />
-                          Live
-                        </span>
-                        <span className="live-game-mode">{liveGame.gameMode}</span>
-                      </div>
-                      <div className="live-game-teams">
-                        {([['100', 'blue'], ['200', 'red']] as const).map(([teamId, side]) => (
-                          <div key={teamId} className={`live-team ${side}`}>
-                            <div className="live-team-label">{side === 'blue' ? 'Blue Side' : 'Red Side'}</div>
-                            {liveGame.players
-                              .filter((p) => p.teamId.toString() === teamId)
-                              .map((p) => {
-                                const champName = getChampName(p.championId)
-                                return (
-                                  <div key={p.puuid} className={`live-player-row ${p.puuid === summonerData.summoner.puuid ? 'is-current' : ''}`}>
-                                    {champName ? (
-                                      <img
-                                        src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/champion/${champName}.png`}
-                                        alt={champName}
-                                        className="live-champ-portrait"
-                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                      />
-                                    ) : (
-                                      <img
-                                        src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/profileicon/${p.profileIconId}.png`}
-                                        alt="profile"
-                                        className="live-champ-portrait"
-                                      />
-                                    )}
-                                    <div className="live-player-info">
-                                      <div className="live-player-name">{p.summonerName ?? '—'}</div>
-                                    </div>
-                                    <div className="live-player-badges">
-                                      {p.streak.status === 'HOT' && (
-                                        <span className="live-streak hot">{p.streak.winStreak}W HOT</span>
-                                      )}
-                                      {p.streak.status === 'COLD' && (
-                                        <span className="live-streak cold">{p.streak.lossStreak}L COLD</span>
-                                      )}
-                                      {p.tags?.map(tag => (
-                                        <span key={tag} className={`live-tag live-tag--${tag.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )
-                              })}
+                  <div className="profile-main">
+                    {liveGame && (() => {
+                      const allChampions = championService.getAllChampions()
+                      const getChampName = (championId: number) =>
+                        allChampions.find((c) => c.key === championId.toString())?.id ?? null
+
+                      return (
+                        <div className="live-game-section">
+                          <div className="live-game-header">
+                            <span className="live-badge">
+                              <span className="live-dot" />
+                              Live
+                            </span>
+                            <span className="live-game-mode">{liveGame.gameMode}</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })()}
+                          <div className="live-game-teams">
+                            {([['100', 'blue'], ['200', 'red']] as const).map(([teamId, side]) => (
+                              <div key={teamId} className={`live-team ${side}`}>
+                                <div className="live-team-label">{side === 'blue' ? 'Blue Side' : 'Red Side'}</div>
+                                {liveGame.players
+                                  .filter((p) => p.teamId.toString() === teamId)
+                                  .map((p) => {
+                                    const champName = getChampName(p.championId)
+                                    return (
+                                      <div key={p.puuid} className={`live-player-row ${p.puuid === summonerData.summoner.puuid ? 'is-current' : ''}`}>
+                                        {champName ? (
+                                          <img
+                                            src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/champion/${champName}.png`}
+                                            alt={champName}
+                                            className="live-champ-portrait"
+                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={`https://ddragon.leagueoflegends.com/cdn/16.6.1/img/profileicon/${p.profileIconId}.png`}
+                                            alt="profile"
+                                            className="live-champ-portrait"
+                                          />
+                                        )}
+                                        <div className="live-player-info">
+                                          <div className="live-player-name">{p.summonerName ?? '—'}</div>
+                                        </div>
+                                        <div className="live-player-badges">
+                                          {p.streak.status === 'HOT' && (
+                                            <span className="live-streak hot">{p.streak.winStreak}W HOT</span>
+                                          )}
+                                          {p.streak.status === 'COLD' && (
+                                            <span className="live-streak cold">{p.streak.lossStreak}L COLD</span>
+                                          )}
+                                          {p.tags?.map(tag => (
+                                            <span key={tag} className={`live-tag live-tag--${tag.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })()}
 
-                {!liveGame && (
-                  <div className="matches-section">
-                    <h3 className="matches-title">Match History ({summonerData.matchHistory.length})</h3>
-                    <div className="matches-grid">
-                      {summonerData.matchDetails.map((match) => (
-                        <MatchCard
-                          key={match.metadata.matchId}
-                          match={match}
-                          gameName={summonerData.account.gameName}
-                          tagLine={summonerData.account.tagLine}
-                          profileIconId={summonerData.summoner.profileIconId}
-                          summonerLevel={summonerData.summoner.summonerLevel}
-                          puuid={summonerData.summoner.puuid}
-                        />
-                      ))}
-                    </div>
+                    {!liveGame && (
+                      <div className="matches-section">
+                        <h3 className="matches-title">Match History ({summonerData.matchHistory.length})</h3>
+                        <div className="matches-grid">
+                          {summonerData.matchDetails.map((match) => (
+                            <MatchCard
+                              key={match.metadata.matchId}
+                              match={match}
+                              gameName={summonerData.account.gameName}
+                              tagLine={summonerData.account.tagLine}
+                              profileIconId={summonerData.summoner.profileIconId}
+                              summonerLevel={summonerData.summoner.summonerLevel}
+                              puuid={summonerData.summoner.puuid}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             )}
           </>

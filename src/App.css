@@ -118,7 +118,7 @@
 /* ── Results layout ──────────────────────────────────── */
 .results-section {
   width: 100%;
-  max-width: 900px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -281,7 +281,27 @@
 }
 
 /* ── Match history ───────────────────────────────────── */
-.matches-section { margin-top: 8px; }
+/* ── Profile body: sidebar (champion/role stats) + main (match history) ── */
+.profile-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.profile-sidebar {
+  flex: 0 0 300px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.matches-section { margin-top: 0; }
 
 .matches-title {
   font-family: 'Rajdhani', sans-serif;
@@ -491,6 +511,9 @@
 @media (max-width: 900px) {
   .app-container { padding: 32px 20px; }
   .results-section { max-width: 100%; }
+  .profile-body { flex-direction: column; }
+  .profile-sidebar { width: 100%; flex: 0 0 auto; flex-direction: row; flex-wrap: wrap; }
+  .profile-sidebar .insights-card { min-width: 260px; }
 }
 
 @media (max-width: 768px) {
@@ -508,43 +531,9 @@
   .app-header h1 { font-size: 32px; letter-spacing: 4px; }
   .summoner-icon { width: 80px; height: 80px; }
   .summoner-info h2 { font-size: 24px; }
+  .profile-sidebar { flex-direction: column; }
+  .profile-sidebar .insights-card { min-width: 0; }
 }
 
-/* ── Ranked Badge ────────────────────────────────────── */
-.ranked-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  flex-wrap: wrap;
-}
-.ranked-tier {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.06);
-}
-.ranked-tier-iron        { color: #8B8B8B; }
-.ranked-tier-bronze      { color: #CD7F32; }
-.ranked-tier-silver      { color: #C0C0C0; }
-.ranked-tier-gold        { color: #C89B3C; }
-.ranked-tier-platinum    { color: #4FC3A1; }
-.ranked-tier-emerald     { color: #00C853; }
-.ranked-tier-diamond     { color: #57C5F7; }
-.ranked-tier-master      { color: #9B59B6; }
-.ranked-tier-grandmaster { color: #CF0000; }
-.ranked-tier-challenger  { color: #F4C14F; }
-.ranked-tier-unranked    { color: #666; }
-.ranked-lp {
-  font-size: 12px;
-  color: #C89B3C;
-  font-weight: 600;
-}
-.ranked-record {
-  font-size: 12px;
-  color: rgba(255,255,255,0.45);
-}
+/* Ranked badge styling now lives in components/RankedBadge/RankedBadge.css and
+   components/RankedSummary/RankedSummary.css */
