@@ -5,6 +5,9 @@ import { CombinedSearchBar } from './components/CombinedSearchBar'
 import { MatchCard } from './components/MatchCard'
 import { MatchCardSkeleton } from './components/MatchCard/MatchCardSkeleton'
 import { ChampionsPage } from './components/ChampionsPage'
+import { RankedBadge, type RankedEntry } from './components/RankedBadge'
+import { ChampionBreakdown, type ChampionStat } from './components/ChampionBreakdown'
+import { RoleBreakdown, type RoleStat } from './components/RoleBreakdown'
 import { championService, type ChampionData } from './services/championService'
 import { saveRecentSearch } from './services/recentSearches'
 import { REGIONS } from './services/regions'
@@ -111,14 +114,6 @@ interface Account {
   gameName: string
   tagLine: string
 }
-interface RankedEntry {
-  tier: string
-  rank: string
-  leaguePoints: number
-  wins: number
-  losses: number
-}
-
 // Maps the backend's error statuses (see javigg README) to something a user can act on.
 function apiErrorMessage(status: number, notFound: string): string {
   if (status === 404) return notFound
@@ -137,6 +132,9 @@ interface SummonerData {
   matchHistory: string[]
   matchDetails: MatchDto[]
   rankedSolo: RankedEntry | null
+  rankedFlex: RankedEntry | null
+  championStats: ChampionStat[]
+  roleStats: RoleStat[]
 }
 
 function App() {
@@ -305,19 +303,10 @@ function App() {
                       <span className="tagline">#{summonerData.account.tagLine}</span>
                       <span className="region-badge">{REGIONS.find(r => r.code === searchRegion)?.label ?? searchRegion}</span>
                     </h2>
-                    {summonerData.rankedSolo ? (
-                      <div className="ranked-badge">
-                        <span className={`ranked-tier ranked-tier-${summonerData.rankedSolo.tier.toLowerCase()}`}>
-                          {summonerData.rankedSolo.tier} {summonerData.rankedSolo.rank}
-                        </span>
-                        <span className="ranked-lp">{summonerData.rankedSolo.leaguePoints} LP</span>
-                        <span className="ranked-record">
-                          {summonerData.rankedSolo.wins}W {summonerData.rankedSolo.losses}L
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="ranked-badge"><span className="ranked-tier ranked-tier-unranked">Unranked</span></div>
-                    )}
+                    <div className="ranked-badges-row">
+                      <RankedBadge queueLabel="Solo/Duo" entry={summonerData.rankedSolo} />
+                      <RankedBadge queueLabel="Flex" entry={summonerData.rankedFlex} />
+                    </div>
                     {matchStats && (
                       <div className="summoner-stats-row">
                         <span className="stat-wins">{matchStats.wins}W</span>
@@ -342,6 +331,11 @@ function App() {
                       New Search
                     </button>
                   </div>
+                </div>
+
+                <div className="insights-row">
+                  <ChampionBreakdown stats={summonerData.championStats} />
+                  <RoleBreakdown stats={summonerData.roleStats} />
                 </div>
 
                 {error && <div className="error-message">{error}</div>}

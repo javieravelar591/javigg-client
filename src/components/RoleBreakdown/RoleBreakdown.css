@@ -1,0 +1,43 @@
+.role-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.role-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.role-row-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #e0e0e0;
+}
+
+.role-row-winrate {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.role-row-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.role-row-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #C89B3C, #e0b85c);
+}
+
+.role-row-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #777;
+}
